@@ -37,7 +37,7 @@ def W_torus_base(n, x):
         matrix[i][bottom] = 1
         matrix[i][left] = 1
         matrix[i][right] = 1
-    return torch.Tensor(matrix)
+    return torch.Tensor(matrix) / np.sum(matrix[0])
 
 def W_torus(n):
     return partial(W_torus_base, n)
@@ -76,12 +76,8 @@ def W_id_base(n, x):
 def W_id(n):
     return partial(W_id_base, n)
 
-def W_random_base(n, x):
-    topologies = [W_centralized(n), W_torus(n), W_ring(n)]
-    return topologies[random.randint(1, len(topologies))]
-
 def W_random(n):
-    topologies = [W_centralized(n), W_torus(n), W_ring(n)]
+    topologies = [W_torus(n), W_ring(n)]
     return topologies[random.randint(0, len(topologies) - 1)]
 
 import random
@@ -273,7 +269,7 @@ class NN():
 def worker_process(backend, errors, rank, world_size, num_epochs, batch_size, W, lr=1/5.25):
     """ Initialize the distributed environment. """
     os.environ['MASTER_ADDR'] = '127.0.0.1'
-    os.environ['MASTER_PORT'] = '29500'
+    os.environ['MASTER_PORT'] = '29510'
     dist.init_process_group(backend, rank=rank, world_size=world_size)
 
     dataset = "mushrooms.txt"
